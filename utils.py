@@ -58,7 +58,7 @@ def generate_groq_answer(context: str, question: str) -> str:
     )
 
     response = client.chat.completions.create(
-        model="mixtral-8x7b-32768",
+        model="mistral-saba-24b,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
         max_tokens=300
