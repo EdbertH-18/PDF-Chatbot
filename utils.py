@@ -4,9 +4,8 @@ from sentence_transformers import SentenceTransformer, util
 import openai
 import os
 
-# Setup for Groq API
-openai.api_base = "https://api.groq.com/openai/v1"
 openai.api_key = os.getenv("GROQ_API_KEY")
+openai.base_url = "https://api.groq.com/openai/v1"
 
 def load_pdf(file) -> list[str]:
     """Extract and split PDF text into paragraphs"""
@@ -56,10 +55,10 @@ def generate_groq_answer(context: str, question: str) -> str:
         "You:"
     )
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="mixtral-8x7b-32768",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
         max_tokens=300
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return response.choices[0].message.content.strip()
