@@ -1,9 +1,9 @@
 import streamlit as st
-import torch
-from sentence_transformers import SentenceTransformer
 from utils import load_pdf, embed_chunks, retrieve_relevant_chunks, generate_groq_answer
+from sentence_transformers import SentenceTransformer
+import torch
 
-st.set_page_config(page_title="PDF Chatbot (RAG)", layout="wide")
+st.set_page_config(page_title="PDF Chatbot", layout="wide")
 st.title("Ask Your PDF")
 st.markdown("This chatbot reads your PDF and answers questions based on its content.")
 
@@ -24,14 +24,16 @@ if doc:
     question = st.text_input("Ask a question based on this PDF:")
     if question:
         question_embedding = embedder.encode(question, convert_to_tensor=True)
-        top_chunks = retrieve_relevant_chunks(question_embedding, chunk_embeddings, chunks, top_k=3)
+        top_chunks = retrieve_relevant_chunks(question_embedding, chunk_embeddings, chunks, top_k=3, min_score=0.35)
 
         if not top_chunks:
             st.warning("🤖 Assistant: Sorry, I couldn't find that info. Want me to connect you with HR?")
         else:
             context = "\n".join(top_chunks)
-            answer = generate_groq_answer(context, question)
-
-            st.markdown("---")
-            st.subheader("💬 Answer")
-            st.write(answer)
+            try:
+                answer = generate_groq_answer(context, question)
+                st.markdown("---")
+                st.subheader("💬 Answer")
+                st.write(answer)
+            except Exception as e:
+                st.error(f"❌ Error from Groq API: {e}")
