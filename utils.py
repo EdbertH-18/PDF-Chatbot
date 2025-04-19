@@ -1,12 +1,12 @@
 import fitz  # PyMuPDF
 import torch
 from sentence_transformers import SentenceTransformer, util
-from openai import OpenAI
+import openai
 import os
 
-openai_api_key = os.getenv("OPENAI_API_KEY")  # Or set manually for local testing
-
-client = OpenAI(api_key=openai_api_key)
+# Setup for Groq API
+openai.api_base = "https://api.groq.com/openai/v1"
+openai.api_key = os.getenv("GROQ_API_KEY")
 
 def load_pdf(file) -> list[str]:
     """Extract and split PDF text into paragraphs"""
@@ -40,7 +40,7 @@ def retrieve_relevant_chunks(
 
     return filtered_chunks
 
-def generate_openai_answer(context: str, question: str) -> str:
+def generate_groq_answer(context: str, question: str) -> str:
     prompt = (
         "You are a friendly HR assistant chatting on WhatsApp. "
         "Your job is to help employees understand company rules.\n"
@@ -56,10 +56,10 @@ def generate_openai_answer(context: str, question: str) -> str:
         "You:"
     )
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+    response = openai.ChatCompletion.create(
+        model="mixtral-8x7b-32768",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
         max_tokens=300
     )
-    return response.choices[0].message.content.strip()
+    return response["choices"][0]["message"]["content"].strip()

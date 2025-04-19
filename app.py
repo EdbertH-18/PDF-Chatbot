@@ -1,7 +1,7 @@
 import streamlit as st
 import torch
 from sentence_transformers import SentenceTransformer
-from utils import load_pdf, embed_chunks, retrieve_relevant_chunks, generate_openai_answer
+from utils import load_pdf, embed_chunks, retrieve_relevant_chunks, generate_groq_answer
 
 st.set_page_config(page_title="PDF Chatbot (RAG)", layout="wide")
 st.title("Ask Your PDF")
@@ -17,7 +17,7 @@ embedder = load_embedder()
 doc = st.file_uploader("Upload a PDF", type="pdf")
 
 if doc:
-    st.success("✅ PDF uploaded successfully.")
+    st.success("PDF uploaded successfully.")
     chunks = load_pdf(doc)
     chunk_embeddings = embed_chunks(chunks, embedder)
 
@@ -30,7 +30,7 @@ if doc:
             st.warning("🤖 Assistant: Sorry, I couldn't find that info. Want me to connect you with HR?")
         else:
             context = "\n".join(top_chunks)
-            answer = generate_openai_answer(context, question)
+            answer = generate_groq_answer(context, question)
 
             st.markdown("---")
             st.subheader("💬 Answer")
